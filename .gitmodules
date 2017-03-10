@@ -1,0 +1,6 @@
+[submodule "pyrsp"]
+	path = pyrsp
+	url = git@github.com:stef/pyrsp.git
+[submodule "NRF24-BTLE-Decoder"]
+	path = NRF24-BTLE-Decoder
+	url = https://github.com/duckythescientist/NRF24-BTLE-Decoder.git
