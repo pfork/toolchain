@@ -3,39 +3,25 @@
 ##################################################
 # GNU Radio Python Flow Graph
 # Title: Nrf2Stdout
-# Generated: Sun Mar  5 18:36:16 2017
+# Generated: Thu Jan 25 15:57:45 2018
 ##################################################
-
-if __name__ == '__main__':
-    import ctypes
-    import sys
-    if sys.platform.startswith('linux'):
-        try:
-            x11 = ctypes.cdll.LoadLibrary('libX11.so')
-            x11.XInitThreads()
-        except:
-            print "Warning: failed to XInitThreads()"
 
 from gnuradio import analog
 from gnuradio import blocks
 from gnuradio import eng_notation
 from gnuradio import filter
 from gnuradio import gr
-from gnuradio import wxgui
 from gnuradio.eng_option import eng_option
 from gnuradio.filter import firdes
-from gnuradio.wxgui import scopesink2
-from grc_gnuradio import wxgui as grc_wxgui
 from optparse import OptionParser
 import math
 import osmosdr
-import wx
 
 
-class nrf2stdout(grc_wxgui.top_block_gui):
+class nrf2stdout(gr.top_block):
 
     def __init__(self):
-        grc_wxgui.top_block_gui.__init__(self, title="Nrf2Stdout")
+        gr.top_block.__init__(self, "Nrf2Stdout")
 
         ##################################################
         # Variables
@@ -48,20 +34,6 @@ class nrf2stdout(grc_wxgui.top_block_gui):
         ##################################################
         # Blocks
         ##################################################
-        self.wxgui_scopesink2_0 = scopesink2.scope_sink_f(
-        	self.GetWin(),
-        	title='Scope Plot',
-        	sample_rate=samp_rate/4,
-        	v_scale=0,
-        	v_offset=0,
-        	t_scale=0,
-        	ac_couple=False,
-        	xy_mode=False,
-        	num_inputs=1,
-        	trig_mode=wxgui.TRIG_MODE_NORM,
-        	y_axis_label='Counts',
-        )
-        self.Add(self.wxgui_scopesink2_0.win)
         self.osmosdr_source_0 = osmosdr.source( args="numchan=" + str(1) + " " + '' )
         self.osmosdr_source_0.set_sample_rate(samp_rate)
         self.osmosdr_source_0.set_center_freq(center_freq, 0)
@@ -69,7 +41,7 @@ class nrf2stdout(grc_wxgui.top_block_gui):
         self.osmosdr_source_0.set_dc_offset_mode(0, 0)
         self.osmosdr_source_0.set_iq_balance_mode(0, 0)
         self.osmosdr_source_0.set_gain_mode(False, 0)
-        self.osmosdr_source_0.set_gain(10, 0)
+        self.osmosdr_source_0.set_gain(42, 0)
         self.osmosdr_source_0.set_if_gain(20, 0)
         self.osmosdr_source_0.set_bb_gain(20, 0)
         self.osmosdr_source_0.set_antenna('', 0)
@@ -86,7 +58,6 @@ class nrf2stdout(grc_wxgui.top_block_gui):
         # Connections
         ##################################################
         self.connect((self.analog_quadrature_demod_cf_0, 0), (self.blocks_float_to_short_0, 0))    
-        self.connect((self.analog_quadrature_demod_cf_0, 0), (self.wxgui_scopesink2_0, 0))    
         self.connect((self.blocks_float_to_short_0, 0), (self.blocks_file_sink_0, 0))    
         self.connect((self.low_pass_filter_0, 0), (self.analog_quadrature_demod_cf_0, 0))    
         self.connect((self.osmosdr_source_0, 0), (self.low_pass_filter_0, 0))    
@@ -103,7 +74,6 @@ class nrf2stdout(grc_wxgui.top_block_gui):
 
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
-        self.wxgui_scopesink2_0.set_sample_rate(self.samp_rate/4)
         self.osmosdr_source_0.set_sample_rate(self.samp_rate)
         self.low_pass_filter_0.set_taps(firdes.low_pass(1, self.samp_rate, 1.9e6, 100e3, firdes.WIN_HAMMING, 6.76))
         self.analog_quadrature_demod_cf_0.set_gain(self.samp_rate/(4*2*math.pi*self.fsk_deviation_hz/8.0))
@@ -126,8 +96,13 @@ class nrf2stdout(grc_wxgui.top_block_gui):
 def main(top_block_cls=nrf2stdout, options=None):
 
     tb = top_block_cls()
-    tb.Start(True)
-    tb.Wait()
+    tb.start()
+    try:
+        raw_input('Press Enter to quit: ')
+    except EOFError:
+        pass
+    tb.stop()
+    tb.wait()
 
 
 if __name__ == '__main__':
